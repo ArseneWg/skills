@@ -1,51 +1,47 @@
 # Handover Guidelines
 
-Use this file to decide whether to create or update a module handover note.
+Handover is a current-state note for the next owner, not a diary or history index.
 
-## Create or Update Handover When
+## Create Or Update
 
-A module has durable state that is expensive to reconstruct from code and short runbooks alone.
+Create or update handover when a module has durable state that is expensive to reconstruct from code and short runbooks alone.
 
-Typical triggers:
-- architecture, layering, or protocol changes were made
-- board-specific validation produced reusable results
-- there are active known limitations or caveats
-- the next owner needs a clear continuation path
-- multiple rounds of work have converged into a current state worth preserving
+Good triggers:
+- architecture, layering, or protocol changes
+- board-specific validation with reusable results
+- active limitations, caveats, or important open risks
+- a continuation path another owner must follow
+- multiple rounds of work converged into one current state
 
-A good mental test:
-- if a new owner would ask “what is the current state, what already works, what is still risky, and where do I continue?”, the module likely needs handover
+Skip handover for typo fixes, one-off commands, discarded debugging branches, or information already captured by source comments or a short runbook.
 
-## Do Not Create or Expand Handover For
+## Content Shape
 
-- minor typo or formatting edits
-- a single command run with no durable consequence
-- speculative analysis with no confirmed outcome
-- temporary debugging branches that were discarded
-- information already fully captured by a short runbook or by source comments
+Use only the sections that add value:
+1. Scope
+2. User Goal
+3. Relevant Entrypoints
+4. Verified Status
+5. Important Commands Or Environments
+6. Known Pitfalls And Limitations
+7. Open Questions Or Unverified Risks
+8. Next Steps
 
-## Keep Handover Iterative
+Rules:
+- Separate verified facts from open questions.
+- Apply the Secret Reference Pattern from `SKILL.md`; never include secret-revealing material.
+- Label current-board, current-host, and current-image observations.
+- Rewrite in place. Collapse stale branches, replace superseded conclusions, and remove obsolete next steps.
 
-Treat handover as a maintained current-state note, not an append-only diary.
+## Avoid
 
-Update in place:
-- collapse stale branches
-- replace superseded conclusions
-- remove obsolete next steps
-- keep only the current validated state and the current unresolved edges
+- chat transcript residue
+- append-only chronology
+- pointer-only handover files
+- history as the primary current-state route
+- presenting unverified risks as facts
+- deleting useful history during routine handover cleanup
 
-## Prefer This Content Shape
+## Multi-Host Workflows
 
-1. Goal or scope
-2. Current code entrypoints
-3. Verified results worth reusing
-4. Active limitations
-5. Next-step guidance
-6. Important caveats or anti-patterns
-
-## Avoid These Failure Modes
-
-- copying chat summaries verbatim
-- logging every conversation turn
-- mixing long history into operational runbooks
-- treating a one-time board observation as a universal rule without labeling it as a sample or current-board reference
+If board, PC, CI, or service roles differ, record commands, paths, permissions, and success signals per side.

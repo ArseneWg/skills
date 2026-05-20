@@ -1,80 +1,87 @@
 ---
 name: module-notes-maintainer
-description: Organize repo operational notes and progress documentation for multi-module work. Use when Codex needs to turn verified chat history, commands, logs, diffs, or current repo state into concise notes; decide whether content belongs in AGENTS.md, module_notes/common/, module_notes/<module>/, or a module-owned history directory; decide whether a module needs a maintained handover/current-status note; add or refactor progressive indexes; or remove redundancy while keeping notes evidence-backed and easy to traverse.
+description: Maintain layered repository notes for multi-module work. Use when Codex needs to preserve verified durable facts, update existing module_notes, refresh handover/current-state notes, create runbooks for validated procedures, maintain active plans for long work, update indexes, or clean stale note references safely.
 ---
 
 # Module Notes Maintainer
 
-Keep repository notes layered, concise, and evidence-backed. Record stable repo rules once, route module details through `module_notes/`, and keep handover notes focused on durable current state rather than chat residue.
+Keep notes useful for the next operator: layered, concise, evidence-backed, and safe. Prefer the smallest update that preserves durable facts.
 
-## Use This Prompt Shape
+## Core Rules
 
-Use a narrow prompt when invoking this skill. Prefer a request shaped like this:
+- Facts need evidence: command output, files read, logs observed, user-provided constraints, or confirmed conclusions.
+- Unverified but important risks may be kept only under `Open Questions` or `Unverified Risks`.
+- Route facts to the narrowest layer future work will read: repo-wide rules in `AGENTS.md`, shared environment facts in `module_notes/common/`, module details in `module_notes/<module>/`.
+- Do not write secrets. Store only safe secret references using the pattern below.
+- Do not delete or rename note files by default. Prefer removing stale links or marking obsolete content. Delete or rename only when cleanup is requested or the stale file is clearly in scope and harmful.
+- Label current-board, current-host, and current-image observations unless there is evidence they are general rules.
+- Preserve useful history when it is intentionally separated, but do not route current handover through history.
+- On repeated runs, maintain the current useful state. Update existing notes in place before creating new files.
 
-`Use $module-notes-maintainer to summarize verified work on <module>, place each fact in the right note layer, decide whether handover needs an update, update indexes, and remove redundancy without losing commands, validation signals, or known caveats.`
+Durable facts worth preserving:
+- User preferences that should steer future work.
+- Environment facts such as board addresses, host paths, device nodes, binaries, services, and version constraints.
+- Recurring-error fixes: symptom, cause or scope, fix or workaround, and rerun guidance.
+- Stable norms: command order, validation gates, and operating rules.
 
-Add only the missing specifics:
-- target module or directory
-- source material to summarize
-- whether the task is create, refine, deduplicate, or hand over
-- whether long-form history already has a separate home
+## Modes
 
-## Follow This Workflow
+- Lightweight: small verified update. Touch the relevant note and required index link only.
+- Standard: handover, runbook, module note, or active-plan update. Identify source buckets, classify durable facts, update the smallest file set, then check the result.
+- Heavy: deduplication, stale-link cleanup, rename, deletion, or restructure. Use only when requested or clearly necessary inside the current scope.
 
-1. Extract only verified facts.
-- Keep commands, paths, logs, and conclusions only if they were actually run, observed, or confirmed from files.
-- Drop speculation, temporary debugging ideas, and stale alternatives.
+Start Lightweight. Escalate only when the current mode cannot preserve the facts safely.
 
-2. Classify each fact by scope and lifespan.
-- Put repo-wide stable collaboration rules in `AGENTS.md`.
-- Put cross-module board access or shared environment rules in `module_notes/common/`.
-- Put module-specific build, deploy, test, and driver notes in `module_notes/<module>/`.
-- Put long-form progress, handover history, or narrative status in a module-owned history directory when one exists.
+## Repeated Runs
 
-3. Decide whether handover is required.
-- Create or update a module handover note when the module has accumulated durable state that another person would otherwise need to reconstruct.
-- Typical triggers are: architecture or protocol changes, board-verified results, non-obvious environment constraints, active known limitations, or a clear next-step chain for continued work.
-- Do not create or expand handover for trivial edits, one-off Q and A, speculative exploration, or temporary debugging noise with no durable outcome.
-- When a handover note already exists, update it in place. Keep it current, remove stale items, and avoid chronological append-only growth.
+When this skill runs multiple times on the same module:
+- Inspect existing routers first: `module_notes/README.md` and `module_notes/<module>/README.md`.
+- Update the owning note in place when the new fact fits its purpose.
+- Replace superseded conclusions with the current verified state; do not append chat chronology.
+- Keep reusable failures as `symptom -> cause/scope -> fix/workaround`.
+- Treat a runbook as the canonical order once the flow is stable; other notes should link or summarize, not duplicate the full sequence.
+- Keep handover current-state focused: goal, entrypoints, verified status, limitations, open risks, and next steps.
+- Update active plan status as work changes: `Active`, `Blocked`, `Completed`, `Abandoned`, or `Superseded`.
+- Create a new note only when existing notes would lose their single purpose.
 
-4. Preserve progressive disclosure.
-- Keep `AGENTS.md` as a stable cache-friendly entrypoint.
-- Keep `module_notes/README.md` as the module router.
-- Keep each module `README.md` as the topic router.
-- Keep detailed procedures in numbered topic files such as `01_build.md` and `02_runtime_test.md`.
-- Keep module handover as a separate topic such as `04_handover.md` only when the threshold in `references/handover-guidelines.md` is met.
+## Secret Reference Pattern
 
-5. Write the smallest useful note.
-- Prefer short headings, direct bullets, and runnable commands.
-- Keep expected success signals and current caveats close to the commands they qualify.
-- Remove duplicate explanations that already exist at a higher layer.
-- Record the current known state, not every past branch of investigation.
+When a workflow needs a secret, durable notes may record only:
+- `Purpose`: what access the secret enables.
+- `Storage`: secret manager, keyring, `pass`/`gopass`, Vault, CI secret store, ignored local file, or encrypted `sops` file.
+- `Lookup`: secret name, key path, environment variable, or config path.
+- `Injection`: env var, mounted file, keyring lookup, CI variable, or interactive retrieval.
+- `Access`: who or which host/role must have permission.
 
-6. Update indexes whenever structure changes.
-- Add a new module entry to `module_notes/README.md` when creating `module_notes/<module>/`.
-- Keep module `README.md` limited to scope, prerequisite entrypoints, and topic list.
-- Add a module handover entry to the module `README.md` when one is created.
-- Link to existing module-owned history docs instead of copying them.
+Never record secret values, private keys, tokens, passwords, cookies, session material, partial values, hashes, screenshots, logs, or commands that print/decode secrets.
 
-7. Verify the result before finishing.
-- Ensure `AGENTS.md` does not contain module runbooks.
-- Ensure module notes do not restate repo-wide rules except as brief references.
-- Ensure each new topic file has a clear single purpose.
-- Ensure naming stays predictable: `README.md` for indexes, `01_xxx.md` for topics.
-- Ensure handover, if present, contains only durable current state, not chat transcript residue.
+Example:
 
-## Apply These Content Rules
+```md
+Required secret: Board SSH password
+Purpose: root login for board recovery workflows.
+Storage: `pass rk/board/root-password`
+Injection: operator retrieves it interactively; do not print it in logs.
+Access: authorized board operators only.
+```
 
-- Record commands in the form most likely to be rerun successfully.
-- Keep board addresses, device paths, module names, and binary names exact.
-- Keep examples short and representative.
-- Prefer “how to verify” over broad prose.
-- Prefer “known limitation” over unproven fixes.
-- Keep history and current runbooks separated when both are needed.
-- Keep handover iterative: rewrite for clarity, collapse stale branches, and keep only what materially helps the next owner continue work.
+## Decision Flow
 
-## Read These References When Needed
+1. Define scope: target module or directory, operation, and mode. For existing modules, inspect current routers before writing.
+2. Identify sources: lightweight work needs only the fact and source; standard/heavy work needs source buckets such as chat conclusions, commands, logs, diffs, files, board observations, or user documents.
+3. Classify durable facts by layer. If a workflow crosses machines, privileges, or transports, keep each side's commands, paths, permissions, and success signals explicit.
+4. Choose artifacts only when justified:
+- Handover: durable current state would be expensive for the next owner to reconstruct.
+- Runbook: a validated ordered procedure would be risky to reconstruct from scattered notes.
+- Active plan: ongoing work may span multiple turns, long runs, board tests, subagents, or context compaction.
+- History: the user asked for history or the repo already has a useful separated history layer.
+5. Write the smallest useful note: exact commands, paths, success/failure signals, and caveats that change operator behavior.
+6. Update only necessary indexes and stale references.
+7. Verify with `references/checklist.md` for standard or heavy work.
 
-- Read `references/placement-model.md` when deciding where a note should live.
-- Read `references/handover-guidelines.md` when deciding whether handover is warranted and what it should contain.
-- Read `references/repo-pattern.md` when following the layout already used in this repository.
+## Reference Loading
+
+Load only what the current decision needs:
+- `references/placement-model.md`: where each note belongs.
+- `references/handover-guidelines.md`: handover threshold and content shape.
+- `references/checklist.md`: final quality gates for material updates.

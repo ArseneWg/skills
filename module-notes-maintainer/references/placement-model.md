@@ -1,104 +1,23 @@
 # Placement Model
 
-Use this file to decide where new information belongs.
+Pick the narrowest layer that future work will read before using the fact. Before restructuring, inspect the existing repo layout and follow it when it is coherent.
 
-## AGENTS.md
+| Layer | Owns | Does Not Own |
+| --- | --- | --- |
+| `AGENTS.md` | Stable repo-wide collaboration, editing, testing, and shared environment rules. A pointer to `module_notes/` when present. | Module build/run steps, module status, plans, runbooks, handover, history, secrets. |
+| `module_notes/README.md` | Top-level module router, reading order, module list, naming convention. | Procedures, handover content, runbook content, repo-wide rules already in `AGENTS.md`. |
+| `module_notes/common/` | Cross-module board, host, transport, permission, cleanup, and environment checks. Safe secret references for shared workflows. | Module-specific build/deploy/runtime status, raw credentials, secret-revealing logs or commands. |
+| `module_notes/<module>/README.md` | Module scope and topic router. Links to active plan, runbook, or handover when present. | Detailed commands, repeated repo philosophy, handover details beyond one-line purpose. |
+| `module_notes/<module>/NN_*.md` | Focused module topic: build, deploy, test, runtime, driver notes, caveats, open questions, safe secret references. | Long history, accidental duplication, unqualified current-board observations, secret material. |
+| `NN_*_runbook.md` | Canonical ordered procedure: steps, commands, expected signals, dependencies, compact recovery guidance. | Broad history, handover narrative, every rationale from deeper topic files. |
+| `NN_*_plan.md` | Active multi-step plan that may be lost across long runs, board tests, subagents, multiple turns, or context compaction. | Completed stale checklists, chat chronology, flattened subplans. |
+| `NN_handover.md` | Current goal, entrypoints, verified status, limitations, next steps, important caveats, open risks. | Raw chat chronology, every explored branch, trivial edits, speculative ideas as facts. |
+| History directory | Milestone summaries and investigation history when the user asks for history or the repo intentionally separates it. | Current-state handover route, operational runbook content. |
 
-Put only repo-wide, stable rules here.
-
-Keep:
-- collaboration rules
-- stable board access constraints shared across modules
-- repo-wide editing or testing constraints
-- the pointer to `module_notes/`
-
-Do not keep:
-- module build commands
-- module runtime validation steps
-- long troubleshooting sequences
-- per-module status or history
-
-## module_notes/README.md
-
-Use this file as the only top-level module router.
-
-Keep:
-- one-line purpose of the note system
-- reading order
-- module entry list
-- naming conventions
-
-Do not keep:
-- detailed procedures
-- repo-wide rules already in `AGENTS.md`
-
-## module_notes/common/
-
-Use this directory for cross-module board access and shared runtime constraints.
-
-Keep:
-- ADB endpoints
-- shared cleanup commands
-- environment checks reused across modules
-
-Do not keep:
-- module-specific build or deploy flows
-- module-specific current status or handover content
-
-## module_notes/<module>/README.md
-
-Use this file as a module router.
-
-Keep:
-- scope
-- prerequisite entrypoints
-- topic list
-
-Do not keep:
-- detailed commands that belong in topic files
-- repeated repository philosophy
-- handover details beyond a pointer to the handover file
-
-## module_notes/<module>/0x_*.md
-
-Use numbered topic files for concrete runbooks.
-
-Keep:
-- build commands
-- deployment steps
-- runtime validation
-- expected good signals
-- known caveats backed by evidence
-
-Do not keep:
-- long historical narratives if a history directory exists
-- duplicate commands that already live in another topic file
-
-## module_notes/<module>/0x_handover.md
-
-Use a module handover file only when the module has durable current state that materially helps the next owner continue.
-
-Keep:
-- current goal or scope
-- key code entrypoints
-- verified validation results worth reusing
-- active known limitations
-- concrete next-step guidance
-- important “do not rely on” caveats
-
-Do not keep:
-- raw chat chronology
-- every past branch that was explored
-- one-off trivial edits
-- speculative ideas without evidence
-
-## Module-Owned History Directories
-
-Use a module-owned history directory for long-form progress, handover history, and chronology.
-
-Keep:
-- milestone summaries
-- investigation history
-- references for deeper background
-
-Do not copy this material into operational runbooks. Link to it from the module README or from the top-level module index instead.
+Rules:
+- `NN` means the repo's ordered numeric prefix, such as `01`, `02`, or `03`.
+- Update the existing owner file in place when a new fact fits its purpose.
+- Create a new topic only when adding the fact would blur an existing file's single purpose.
+- A runbook may intentionally repeat the minimum validated command chain; make it clearly canonical.
+- Apply the Secret Reference Pattern from `SKILL.md` wherever a secret is required.
+- If cleanup is needed, remove stale links first, mark obsolete content second, and rename/delete only when safe and in scope.
