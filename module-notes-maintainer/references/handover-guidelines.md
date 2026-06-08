@@ -1,47 +1,43 @@
 # Handover Guidelines
 
-Handover is a current-state note for the next owner, not a diary or history index.
+`<module>/<function>/handover.md` must let a new operator continue without reading the chat.
 
-## Create Or Update
+## Include
 
-Create or update handover when a module has durable state that is expensive to reconstruct from code and short runbooks alone.
+- Scope: what function this handover covers, and what it does not cover.
+- Current state: the latest verified conclusion, not every step that led there.
+- Verified evidence: commands, logs, diffs, board observations, or explicit user confirmations that matter for future work.
+- Current artifacts: binary paths, model paths, image paths, board destinations, logs, datasets, configs, or output directories.
+- Known limits: conditions where current results should not be reused.
+- Next actions: short ordered list of what to do next and how to verify it.
+- Open risks: clearly marked unverified assumptions.
 
-Good triggers:
-- architecture, layering, or protocol changes
-- board-specific validation with reusable results
-- active limitations, caveats, or important open risks
-- a continuation path another owner must follow
-- multiple rounds of work converged into one current state
+## Exclude
 
-Skip handover for typo fixes, one-off commands, discarded debugging branches, or information already captured by source comments or a short runbook.
+- Chat transcript summaries.
+- Dated append-only runs that do not change the current conclusion.
+- Discarded branches unless the negative conclusion prevents repeated work.
+- Generic build/ADB rules that belong in `common/`.
+- Full command sequences that belong in `runbook.md`.
 
-## Content Shape
+## Shape
 
-Use only the sections that add value:
-1. Scope
-2. User Goal
-3. Relevant Entrypoints
-4. Verified Status
-5. Important Commands Or Environments
-6. Known Pitfalls And Limitations
-7. Open Questions Or Unverified Risks
-8. Next Steps
+Prefer this structure:
 
-Rules:
-- Separate verified facts from open questions.
-- Apply the Secret Reference Pattern from `SKILL.md`; never include secret-revealing material.
-- Label current-board, current-host, and current-image observations.
-- Rewrite in place. Collapse stale branches, replace superseded conclusions, and remove obsolete next steps.
+```markdown
+# <Function> Handover
 
-## Avoid
+## Current State
+- ...
 
-- chat transcript residue
-- append-only chronology
-- pointer-only handover files
-- history as the primary current-state route
-- presenting unverified risks as facts
-- deleting useful history during routine handover cleanup
+## Verified Facts
+- ...
 
-## Multi-Host Workflows
+## Next Steps
+1. ...
 
-If board, PC, CI, or service roles differ, record commands, paths, permissions, and success signals per side.
+## Open Risks
+- ...
+```
+
+Keep it short enough to read first. If it grows because procedures are mixed in, move the procedures to `runbook.md`.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Module Notes Maintainer"
-  short_description: "Maintain layered repo notes without over-documenting"
-  default_prompt: "Use $module-notes-maintainer to update the smallest useful repo notes for <module>. Prefer updating existing notes in place, preserve verified durable facts, use safe secret references, justify handover/runbook/plan files, update necessary indexes, and avoid unrelated cleanup."
+  short_description: "Maintain module/function notes and runbooks"
+  default_prompt: "Use $module-notes-maintainer to update module_notes by module/function, preserve reusable commands in runbook.md, keep module_notes/README.md as the only index, and run the audit script after migrations or broad cleanup."

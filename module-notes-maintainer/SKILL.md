@@ -1,87 +1,119 @@
 ---
 name: module-notes-maintainer
-description: Maintain layered repository notes for multi-module work. Use when Codex needs to preserve verified durable facts, update existing module_notes, refresh handover/current-state notes, create runbooks for validated procedures, maintain active plans for long work, update indexes, or clean stale note references safely.
+description: Maintain repository module_notes organized by module/function. Use when Codex needs to create or update module/function notes, handovers, runbooks, corrections, common user preferences, tested command records, environment facts, recurring-error fixes, or current handoff/runbook records.
 ---
 
 # Module Notes Maintainer
 
-Keep notes useful for the next operator: layered, concise, evidence-backed, and safe. Prefer the smallest update that preserves durable facts.
+Keep the next operator unblocked. Notes are organized by module, then by function. Write only durable, verified information that changes how future work should be done.
 
-## Core Rules
+## Core Model
 
-- Facts need evidence: command output, files read, logs observed, user-provided constraints, or confirmed conclusions.
-- Unverified but important risks may be kept only under `Open Questions` or `Unverified Risks`.
-- Route facts to the narrowest layer future work will read: repo-wide rules in `AGENTS.md`, shared environment facts in `module_notes/common/`, module details in `module_notes/<module>/`.
-- Do not write secrets. Store only safe secret references using the pattern below.
-- Do not delete or rename note files by default. Prefer removing stale links or marking obsolete content. Delete or rename only when cleanup is requested or the stale file is clearly in scope and harmful.
-- Label current-board, current-host, and current-image observations unless there is evidence they are general rules.
-- Preserve useful history when it is intentionally separated, but do not route current handover through history.
-- On repeated runs, maintain the current useful state. Update existing notes in place before creating new files.
+Default layout:
 
-Durable facts worth preserving:
-- User preferences that should steer future work.
-- Environment facts such as board addresses, host paths, device nodes, binaries, services, and version constraints.
-- Recurring-error fixes: symptom, cause or scope, fix or workaround, and rerun guidance.
-- Stable norms: command order, validation gates, and operating rules.
-
-## Modes
-
-- Lightweight: small verified update. Touch the relevant note and required index link only.
-- Standard: handover, runbook, module note, or active-plan update. Identify source buckets, classify durable facts, update the smallest file set, then check the result.
-- Heavy: deduplication, stale-link cleanup, rename, deletion, or restructure. Use only when requested or clearly necessary inside the current scope.
-
-Start Lightweight. Escalate only when the current mode cannot preserve the facts safely.
-
-## Repeated Runs
-
-When this skill runs multiple times on the same module:
-- Inspect existing routers first: `module_notes/README.md` and `module_notes/<module>/README.md`.
-- Update the owning note in place when the new fact fits its purpose.
-- Replace superseded conclusions with the current verified state; do not append chat chronology.
-- Keep reusable failures as `symptom -> cause/scope -> fix/workaround`.
-- Treat a runbook as the canonical order once the flow is stable; other notes should link or summarize, not duplicate the full sequence.
-- Keep handover current-state focused: goal, entrypoints, verified status, limitations, open risks, and next steps.
-- Update active plan status as work changes: `Active`, `Blocked`, `Completed`, `Abandoned`, or `Superseded`.
-- Create a new note only when existing notes would lose their single purpose.
-
-## Secret Reference Pattern
-
-When a workflow needs a secret, durable notes may record only:
-- `Purpose`: what access the secret enables.
-- `Storage`: secret manager, keyring, `pass`/`gopass`, Vault, CI secret store, ignored local file, or encrypted `sops` file.
-- `Lookup`: secret name, key path, environment variable, or config path.
-- `Injection`: env var, mounted file, keyring lookup, CI variable, or interactive retrieval.
-- `Access`: who or which host/role must have permission.
-
-Never record secret values, private keys, tokens, passwords, cookies, session material, partial values, hashes, screenshots, logs, or commands that print/decode secrets.
-
-Example:
-
-```md
-Required secret: Board SSH password
-Purpose: root login for board recovery workflows.
-Storage: `pass rk/board/root-password`
-Injection: operator retrieves it interactively; do not print it in logs.
-Access: authorized board operators only.
+```text
+module_notes/
+  README.md                  # the single directory/index router
+  common/
+    00_user_preferences.md
+    <shared-board-build-adb-ssh-tooling>.md
+  <module>/
+    <function>/
+      README.md              # current functional entrypoint, not a directory index
+      handover.md
+      runbook.md
+      corrections.md
 ```
 
-## Decision Flow
+`module_notes/README.md` is the only place for directory records and module/function listings. Do not create `module_notes/<module>/README.md`, `history/`, `history/README.md`, or other index-only files. Existing flat notes should not be preserved as compatibility routers: distill useful facts into the function's current `README.md`, `handover.md`, `runbook.md`, or `corrections.md`, then delete obsolete files.
 
-1. Define scope: target module or directory, operation, and mode. For existing modules, inspect current routers before writing.
-2. Identify sources: lightweight work needs only the fact and source; standard/heavy work needs source buckets such as chat conclusions, commands, logs, diffs, files, board observations, or user documents.
-3. Classify durable facts by layer. If a workflow crosses machines, privileges, or transports, keep each side's commands, paths, permissions, and success signals explicit.
-4. Choose artifacts only when justified:
-- Handover: durable current state would be expensive for the next owner to reconstruct.
-- Runbook: a validated ordered procedure would be risky to reconstruct from scattered notes.
-- Active plan: ongoing work may span multiple turns, long runs, board tests, subagents, or context compaction.
-- History: the user asked for history or the repo already has a useful separated history layer.
-5. Write the smallest useful note: exact commands, paths, success/failure signals, and caveats that change operator behavior.
-6. Update only necessary indexes and stale references.
-7. Verify with `references/checklist.md` for standard or heavy work.
+## Before Writing
 
-## Reference Loading
+- Read the routers first: `AGENTS.md`, then `module_notes/README.md`. Use the root README to find common docs and the target function. Then read the relevant function `README.md` if it exists.
+- Identify the module and function. If a new request looks similar to an existing function, update the existing function docs instead of creating a new directory.
+- If the target function is unclear or two existing functions may match, ask the user before creating a new module/function directory.
+- For migrations or broad cleanups, inventory the source files before editing: command fences, shell snippets, binary paths, board paths, success/failure signals, and user corrections. Use `git show HEAD:<old-path>` when deleting tracked old notes.
+- Keep `AGENTS.md` as the top documentation entry only: reading order, module/function index pointer, and "read docs first" rule. Do not put module runbooks there.
 
-Load only what the current decision needs:
-- `references/placement-model.md`: where each note belongs.
-- `references/handover-guidelines.md`: handover threshold and content shape.
-- `references/checklist.md`: final quality gates for material updates.
+## What To Record
+
+Record these durable items in the narrowest useful place:
+
+- User preferences: repeated user requirements, strong corrections, preferred workflows, naming, validation style, and "do not do this again" rules.
+- Corrections: user pointed out an agent mistake, the root cause, the fix, and the future guard. Put feature-specific corrections in `<function>/corrections.md`; cross-module mistakes go to `common/`.
+- Tested commands: exact command, key parameters, working directory, built binary path, deployed board path, and success/failure signals.
+- Environment facts: board address, host paths, device nodes, services, firmware/image state, tool versions, and known permissions.
+- Recurring errors: symptom -> cause/scope -> fix/workaround -> how to verify.
+- Stable norms: command order, validation gates, cleanup rules, and operating rules.
+- Handover: at the end of meaningful work, update `<function>/handover.md` so a new person can continue without reading the chat.
+- Open questions: keep unverified but important risks under `Open Questions` / `Unverified Risks`, not mixed into verified status.
+
+## Placement Rules
+
+- `module_notes/README.md` owns all directory/index records: modules, functions, common docs, and where to start. Keep this centralized unless the user explicitly chooses a different single index file such as `module_notes/modules/README.md`.
+- `module_notes/common/` owns common user preferences, current board access, ADB/SSH rules, SDK/kernel/Buildroot package build commands, shared host setup, and cross-module mistakes. Do not add `common/README.md` just to index these files; list them in the root README.
+- `<function>/README.md` is the current work entrypoint: scope, current goal/state, where to start, and any critical links. It must contain useful current context, not just a file list.
+- `<function>/handover.md` owns current status, verified state, limitations, open risks, and next steps.
+- `<function>/runbook.md` owns reusable ordered procedures and exact validated commands.
+- `<function>/corrections.md` owns mistakes that must not repeat.
+
+## Writing Rules
+
+- Evidence first: record facts only when backed by command output, files read, logs, board observations, code diffs, or explicit user confirmation.
+- Update current docs in place. Do not append chat chronology.
+- Do not let an entrypoint become a流水账. If repeated dated runs contain durable value, distill the latest valid conclusion into `handover.md` or the reusable command into `runbook.md`; discard non-durable chronology.
+- Extract common facts while writing. If a command or rule applies across modules, put it in `common/` and link to it from the function.
+- Keep runbooks canonical: when a command sequence is stable, maintain it in `runbook.md`; other docs should link or summarize instead of duplicating the full sequence.
+- Keep commands runnable. Include cwd, env vars, binary path, board destination path, and verification command when they matter.
+- Split multi-host work clearly. Host, board, CI, and service commands need separate paths, permissions, and success signals.
+- Separate verified facts from open questions.
+- Do not write secrets, tokens, passwords, cookies, private keys, partial secret values, hashes, screenshots, logs, or commands that print/decode secrets. Record only purpose, storage location, lookup name, injection method, and access owner.
+- Preserve useful facts, not obsolete structure. Distill durable evidence into the relevant current function files, and delete obsolete flat files or dated raw summaries unless the user explicitly asks to keep raw evidence outside the normal note layout.
+- When migrating or compressing existing notes, inventory source command blocks, executable snippets, paths, binaries, board destinations, and success signals before deleting source files. Map them into the target function `runbook.md`; if a source has no recoverable command record, state that gap explicitly in `handover.md` or `runbook.md`.
+- Keep the single root index current whenever a module/function directory is created, moved, or becomes the recommended entrypoint.
+- Do not use `legacy_*.md`, `history/`, or any extra dated-evidence directory for retained notes.
+- Do not create index-only files. A README is allowed only when it is the root index or a function's current work entrypoint with real operational context.
+
+## Migration Audit
+
+When converting flat notes or compressing noisy docs:
+
+1. Build a source inventory before deleting anything:
+   - Count and inspect source command fences: `rg -n '^```' module_notes/<old-scope>`.
+   - Search for commands and paths: `rg -n 'adb|ssh|scp|push|pull|build.sh|make |cmake|ninja|python3|/userdata|/usr/bin|success|失败|成功信号|验证'`.
+   - Check tracked deleted sources with `git show HEAD:<path>` if the file is already gone.
+2. Map every source command record to exactly one target function `runbook.md`.
+3. Normalize environment-specific values:
+   - Current board serial belongs in `common/01_board_access.md`; function runbooks should use `$BOARD` unless the old serial is itself the subject.
+   - Replace passwords, PSKs, tokens, and private values with placeholders such as `<wifi-psk>` and document the lookup owner/method, not the value.
+4. If no recoverable command exists for a function, write that as a current gap in `handover.md` or `runbook.md`. Do not leave an empty template that looks complete.
+5. Run the audit script when available:
+   `python3 <skill-dir>/scripts/audit_module_notes.py module_notes`
+
+## End-Of-Work Guard
+
+Before finishing any module-notes update, check:
+
+- The module/function was identified and routed correctly.
+- A similar existing function was reused, or the user approved a new one when ambiguous.
+- New modules/functions are linked from `module_notes/README.md`.
+- Common facts were extracted to `common/`.
+- Verified facts and open questions are separated.
+- Tested commands include exact parameters, paths, and success signals.
+- For migrations, source command blocks and runbook facts were reconciled against target `runbook.md` files, or the unrecoverable gap is explicitly documented.
+- Corrections were captured when the user pointed out a mistake.
+- The function `handover.md` lets a new operator continue from the current state.
+- Stable command sequences live in `runbook.md`, not copied across multiple current docs.
+- Entrypoints remain concise; dated logs are not kept in module notes unless their current conclusion has been distilled.
+- No module-level, common-level, or history-level README exists, and no `history/` directory is created.
+- No obsolete flat compatibility pointer remains after a migration.
+- Broad migrations pass `scripts/audit_module_notes.py`, or any remaining failures are intentionally documented and explained.
+
+## References
+
+Only load these when they help the current edit:
+- `references/placement-model.md`: compact ownership table.
+- `references/handover-guidelines.md`: handover content shape.
+- `references/repo-pattern.md`: repository-specific current layout.
+- `references/checklist.md`: final guard checklist.
+- `scripts/audit_module_notes.py`: deterministic module_notes layout/content audit; run after migrations and broad cleanup.

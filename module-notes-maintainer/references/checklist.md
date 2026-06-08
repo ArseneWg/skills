@@ -1,30 +1,26 @@
-# Review Checklist
+# Module Notes Checklist
 
-Use this for Standard or Heavy updates. For Lightweight updates, check only the first section.
+Use this before finishing a notes update.
 
-## Always
-
-- Facts are verified, or explicitly labeled as open questions/unverified risks.
-- The note lives in the narrowest useful layer.
-- Required secrets use only the Secret Reference Pattern from `SKILL.md`.
-- Current-board, current-host, and current-image observations are scoped.
-- No unrelated cleanup, formatting, rename, or deletion was introduced.
-- Existing routers were checked before creating a new topic file.
-
-## Material Updates
-
-- Source buckets were considered: commands, logs, files, diffs, board observations, chat conclusions, or user documents.
-- Durable facts were preserved when relevant: user preferences, environment facts, recurring-error fixes, stable norms.
-- Commands are exact and include nearby success/failure signals.
-- Reusable failures are captured as `symptom -> cause/scope -> fix/workaround`.
-- Multi-host or multi-privilege workflows keep each side separate.
-- Superseded conclusions were replaced with current state instead of appended as chronology.
-
-## Artifact-Specific
-
-- Handover states current goal, entrypoints, verified status, limitations, open risks, and next steps.
-- Runbook is an ordered, validated procedure with dependencies and compact recovery guidance.
-- Active plan has status: `Active`, `Blocked`, `Completed`, `Abandoned`, or `Superseded`.
-- Stable runbooks are canonical; other notes do not duplicate the full sequence.
-- Indexes link only to current useful notes; completed or superseded plans are not presented as active.
-- History remains separate from current-state guidance.
+- Did I read the routers: `AGENTS.md`, `module_notes/README.md`, then the relevant function README?
+- Did I identify the module and function?
+- Did I reuse an existing similar function, or ask before creating a new one?
+- Are user preferences, corrections, tested commands, environment facts, recurring errors, and stable norms saved in the right place?
+- Are verified facts backed by command output, files, logs, board observations, diffs, or explicit user confirmation?
+- Are open questions / unverified risks separated from verified status?
+- Are exact commands complete enough to rerun: cwd, env vars, binary path, board path, parameters, success signal?
+- For migrations, did I inventory old command fences, executable snippets, paths, board destinations, and success/failure signals before deleting source files?
+- Did every recoverable source command land in exactly one target `runbook.md`?
+- If a runbook has no command fences, does its runbook or handover explicitly say why no recoverable/fixed command exists?
+- Did I replace stale sample board serials with `$BOARD` and keep the current board value in `common/01_board_access.md`?
+- Are host/board/CI/service commands separated when roles differ?
+- Does the canonical command sequence live in `runbook.md` instead of being duplicated?
+- Did I extract cross-module facts to `module_notes/common/`?
+- Did I update the function `handover.md` after meaningful work?
+- Are new modules/functions discoverable from `module_notes/README.md`?
+- Are current entrypoints concise, with durable dated-run conclusions distilled into handover/runbook instead of stored as chronology?
+- Did I avoid creating README files that only list files, especially module-level, common-level, or history-level README files?
+- Did I delete obsolete flat compatibility pointers after moving useful content?
+- Did I avoid creating `history/` directories?
+- Did I avoid secrets, partial secret values, secret logs/screenshots, and secret-printing commands?
+- For broad migrations, did I run `python3 <skill-dir>/scripts/audit_module_notes.py module_notes` and resolve or explain every failure?
