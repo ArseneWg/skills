@@ -1,0 +1,4 @@
+interface:
+  display_name: "RK Redmine Analysis"
+  short_description: "Analyze Redmine issues with code evidence."
+  default_prompt: "Use $rk-redmine-analysis to download a Redmine issue, archive its attachments under redmine/, and produce a code-backed diagnosis."
