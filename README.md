@@ -2,6 +2,22 @@
 
 This repository is a small, shareable collection of custom Codex skills built from real engineering workflows. Each skill is meant to be dropped into `~/.codex/skills` and used directly, with references and helper scripts included only where they materially improve repeatability.
 
+## Table Of Contents
+
+- [Featured Skills](#featured-skills)
+- [Detailed Skill Usage](#detailed-skill-usage)
+  - [`git-repo-publish-sanitize`](#git-repo-publish-sanitize)
+  - [`module-notes-maintainer`](#module-notes-maintainer)
+  - [`rk-gerrit`](#rk-gerrit)
+  - [`pptx`](#pptx)
+  - [`rk-redmine-analysis`](#rk-redmine-analysis)
+  - [`slides`](#slides)
+  - [`smux`](#smux)
+- [Install](#install)
+- [Example Prompts](#example-prompts)
+- [Why This Repo Exists](#why-this-repo-exists)
+- [Contributor Notes](#contributor-notes)
+
 ## Featured Skills
 
 | Skill | What it solves | Notable details |
