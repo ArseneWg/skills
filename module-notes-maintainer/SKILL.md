@@ -57,6 +57,19 @@ Record these durable items in the narrowest useful place:
 - `<function>/runbook.md` owns reusable ordered procedures and exact validated commands.
 - `<function>/corrections.md` owns mistakes that must not repeat.
 
+## Handover Shape
+
+Write `handover.md` for a capable operator who has not read the chat and does not know the module yet. Keep it concise, current, and judgment-oriented. A useful handover normally covers these six areas:
+
+1. Scope and goal: what module/function this covers, the target board/package/artifact, and what problem the work solves.
+2. Current implementation state: what is already wired up, which paths/configs own the behavior, and what the current user-facing behavior is.
+3. Change boundaries and critical principles: the files or ownership layers that are in scope, files or layers that should not be changed for this problem, and any user corrections that constrain future work.
+4. Verified facts: builds, deployment paths, board/runtime checks, success signals, and negative tests that have actually been observed.
+5. Handoff path: where a new operator should start, which runbook sections to use first, and the shortest safe baseline to rerun before changing code.
+6. Open risks and limits: what has not been validated, what varies by environment, and what should not be treated as a fixed fact.
+
+Do not use handover as a dated execution log. Put exact reusable commands, long matrices, logs, and raw output in `runbook.md` or discard them after distilling their durable conclusion. If a handover section would duplicate runbook commands, replace it with a pointer to the runbook and the success signal.
+
 ## Writing Rules
 
 - Evidence first: record facts only when backed by command output, files read, logs, board observations, code diffs, or explicit user confirmation.
@@ -102,7 +115,7 @@ Before finishing any module-notes update, check:
 - Tested commands include exact parameters, paths, and success signals.
 - For migrations, source command blocks and runbook facts were reconciled against target `runbook.md` files, or the unrecoverable gap is explicitly documented.
 - Corrections were captured when the user pointed out a mistake.
-- The function `handover.md` lets a new operator continue from the current state.
+- The function `handover.md` lets a new operator continue from the current state, including scope, implementation state, change boundaries, verified facts, handoff path, and open risks.
 - Stable command sequences live in `runbook.md`, not copied across multiple current docs.
 - Entrypoints remain concise; dated logs are not kept in module notes unless their current conclusion has been distilled.
 - No module-level, common-level, or history-level README exists, and no `history/` directory is created.
