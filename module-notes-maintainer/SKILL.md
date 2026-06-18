@@ -72,6 +72,8 @@ Do not use handover as a dated execution log. Put exact reusable commands, long 
 
 For experiment-heavy work, compress aggressively: the first handover section should state the goal, acceptance line, current conclusion, and conclusion boundary. Keep only the current recommended state, the minimum proof signals that justify it, decisive boundary failures, and open risks. Replace older conclusions in place instead of appending dated sections. Put experiment matrices and failed-run details in a temporary plan or `runbook.md`. Label maturity explicitly, for example `experiment candidate`, `current offline recommended config`, or `product default`.
 
+For unfinished work paused for a long time, record the checkpoint in `handover.md`, not a new file. Keep it to four fields: resume entry (first file, cwd, smallest validation command), current state (branch/commit, key paths, uncommitted-change ownership, artifact or board state), proven boundary (last trusted verification, ruled-out paths with evidence, unverified assumptions), and next action (smallest executable step and result-driven branches).
+
 ## Writing Rules
 
 - Evidence first: record facts only when backed by command output, files read, logs, board observations, code diffs, or explicit user confirmation.
@@ -79,6 +81,7 @@ For experiment-heavy work, compress aggressively: the first handover section sho
 - Do not let an entrypoint become a流水账. If repeated dated runs contain durable value, distill the latest valid conclusion into `handover.md` or the reusable command into `runbook.md`; discard non-durable chronology.
 - Runbooks are operating manuals, not experiment logs. Keep reusable commands, acceptance gates, and at most one compact "current baselines" table; update or replace rows when new evidence supersedes old evidence.
 - Raw dated experiments belong in a temporary plan or scratch record. `handover.md` gets the distilled conclusion and current limits; `runbook.md` gets only the stable procedure and minimal proof signal needed to rerun it.
+- Temporary plans may keep raw chronology, but any top or current-state summary must be refreshed when evidence changes; replace stale summary rows or explicitly mark them superseded before finishing.
 - If a runbook edit adds multiple dated headings, repeats an existing command block, or preserves old samples only "for context", stop and compress before finishing.
 - Extract common facts while writing. If a command or rule applies across modules, put it in `common/` and link to it from the function.
 - Keep runbooks canonical: when a command sequence is stable, maintain it in `runbook.md`; other docs should link or summarize instead of duplicating the full sequence.
@@ -121,6 +124,7 @@ Before finishing any module-notes update, check:
 - For migrations, source command blocks and runbook facts were reconciled against target `runbook.md` files, or the unrecoverable gap is explicitly documented.
 - Corrections were captured when the user pointed out a mistake.
 - The function `handover.md` lets a new operator continue from the current state, including scope, implementation state, change boundaries, verified facts, handoff path, and open risks.
+- Long-pause handovers include resume entry, current state, proven boundary, and next action when the task is unfinished.
 - Stable command sequences live in `runbook.md`, not copied across multiple current docs.
 - Entrypoints remain concise; dated logs are not kept in module notes unless their current conclusion has been distilled.
 - No module-level, common-level, or history-level README exists, and no `history/` directory is created.
