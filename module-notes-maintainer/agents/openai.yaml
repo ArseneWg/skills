@@ -1,4 +1,4 @@
 interface:
   display_name: "Module Notes Maintainer"
-  short_description: "Maintain module/function notes and runbooks"
-  default_prompt: "Use $module-notes-maintainer to update module_notes by module/function, preserve reusable commands in runbook.md, keep module_notes/README.md as the only index, and run the audit script after migrations or broad cleanup."
+  short_description: "Maintain module notes, runbooks, solved issues, and constraints"
+  default_prompt: "Use $module-notes-maintainer to maintain module_notes by module/function: keep module_notes/README.md as the only index, keep each function README as a short first-screen entrypoint, put detailed continuation state in handover.md, reusable commands in runbook.md, solved issues in styled prose-first corrections.md records, durable constraints in constraints.md, and run the audit script after migrations or broad cleanup."

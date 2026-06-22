@@ -1,6 +1,6 @@
 ---
 name: module-notes-maintainer
-description: Maintain repository module_notes organized by module/function. Use when Codex needs to create or update module/function notes, handovers, runbooks, corrections, common user preferences, tested command records, environment facts, recurring-error fixes, or current handoff/runbook records.
+description: Maintain repository module_notes organized by module/function. Use when Codex needs to create or update module/function notes, handovers, runbooks, corrections, constraints, common user preferences, tested command records, environment facts, recurring-error fixes, current handoff/runbook records, or solved-issue learning capture. For solved issues, use this skill when the user explicitly wants to turn a verified or bounded investigation into problem/root cause/fix/verification/regression-prevention notes.
 ---
 
 # Module Notes Maintainer
@@ -20,12 +20,13 @@ module_notes/
   <module>/
     <function>/
       README.md              # current functional entrypoint, not a directory index
-      handover.md
+      handover.md             # detailed current continuation state
       runbook.md
       corrections.md
+      constraints.md
 ```
 
-`module_notes/README.md` is the only place for directory records and module/function listings. Do not create `module_notes/<module>/README.md`, `history/`, `history/README.md`, or other index-only files. Existing flat notes should not be preserved as compatibility routers: distill useful facts into the function's current `README.md`, `handover.md`, `runbook.md`, or `corrections.md`, then delete obsolete files.
+`module_notes/README.md` is the only place for directory records and module/function listings. Do not create `module_notes/<module>/README.md`, `history/`, `history/README.md`, or other index-only files. Existing flat notes should not be preserved as compatibility routers: distill useful facts into the function's current `README.md`, `handover.md`, `runbook.md`, `corrections.md`, or `constraints.md`, then delete obsolete files.
 
 ## Before Writing
 
@@ -40,7 +41,8 @@ module_notes/
 Record these durable items in the narrowest useful place:
 
 - User preferences: repeated user requirements, strong corrections, preferred workflows, naming, validation style, and "do not do this again" rules.
-- Corrections: user pointed out an agent mistake, the root cause, the fix, and the future guard. Put feature-specific corrections in `<function>/corrections.md`; cross-module mistakes go to `common/`.
+- Corrections and solved issues: concrete mistakes or failures, the root cause, the fix, verification, and the future guard. Put feature-specific records in `<function>/corrections.md`; cross-module mistakes go to `common/`.
+- Constraints: durable design, API, workflow, or documentation rules that should shape future edits but are not themselves a solved failure. Put feature-specific constraints in `<function>/constraints.md`; cross-module constraints go to `common/`.
 - Tested commands: exact command, key parameters, working directory, built binary path, deployed board path, and success/failure signals.
 - Environment facts: board address, host paths, device nodes, services, firmware/image state, tool versions, and known permissions.
 - Recurring errors: symptom -> cause/scope -> fix/workaround -> how to verify.
@@ -48,14 +50,69 @@ Record these durable items in the narrowest useful place:
 - Handover: at the end of meaningful work, update `<function>/handover.md` so a new person can continue without reading the chat.
 - Open questions: keep unverified but important risks under `Open Questions` / `Unverified Risks`, not mixed into verified status.
 
+## Solved Issue Mode
+
+Use this as a mode inside this skill, not a separate skill. Enter this mode only when the user explicitly wants a solved or clearly bounded investigation turned into reusable notes. Do not use it for ordinary note edits, placement questions, runbook updates, handover refreshes, or current-status records.
+
+When solved-issue mode applies, read `references/solved-issue-mode.md`, distill the learning there, then return to the placement and writing rules in this file.
+
 ## Placement Rules
 
 - `module_notes/README.md` owns all directory/index records: modules, functions, common docs, and where to start. Keep this centralized unless the user explicitly chooses a different single index file such as `module_notes/modules/README.md`.
 - `module_notes/common/` owns common user preferences, current board access, ADB/SSH rules, SDK/kernel/Buildroot package build commands, shared host setup, and cross-module mistakes. Do not add `common/README.md` just to index these files; list them in the root README.
-- `<function>/README.md` is the current work entrypoint: scope, current goal/state, where to start, and any critical links. It must contain useful current context, not just a file list.
-- `<function>/handover.md` owns current status, verified state, limitations, open risks, and next steps.
+- `<function>/README.md` is the stable first-screen entrypoint: scope, current goal, a short current-state summary, where to start, and critical links. It should answer "what is this function and where do I read next"; it must not become a detailed implementation record, evidence matrix, risk inventory, technical-debt list, long next-step plan, or dated run log.
+- `<function>/handover.md` owns the detailed current continuation state: implementation state, verified facts, change boundaries, limitations, open risks, and next actions.
 - `<function>/runbook.md` owns reusable ordered procedures and exact validated commands.
-- `<function>/corrections.md` owns mistakes that must not repeat.
+- `<function>/corrections.md` owns concrete solved problems, user-corrected mistakes, root cause, fix, verification, and future guard.
+- `<function>/constraints.md` owns durable constraints, design rules, API boundaries, workflow rules, and "do not regress" decisions that are not tied to one solved failure.
+
+Use explicit, readable record blocks so problems and constraints stay visually separate. If a `corrections.md` or `constraints.md` file has more than one record, add a `## 目录` section near the top. Prefer a compact table with `编号` / `记录` / `类型`; numbered links are acceptable only for tiny homogeneous files. Keep the record type in a bold blockquote, and keep bold field labels on their own line. Prefer natural paragraphs inside each field; use bullets only for genuinely parallel items such as separate commands, independent evidence points, or a short case matrix.
+
+```markdown
+## 目录
+
+| 编号 | 记录 | 类型 |
+| --- | --- | --- |
+| 01 | [<specific problem or mistake>](#<anchor>) | 已解决问题 |
+
+## <specific problem or mistake>
+> **类型：已解决问题**
+
+**问题：**
+<observable behavior, exact error, path, metric, or degraded behavior>.
+
+**根因：**
+<verified cause and scope>.
+
+**修复：**
+<minimal working fix, durable change, or workaround>.
+
+**验证：**
+<commands, logs, code paths, board observations, diffs, or user-confirmed signals proving the fix>.
+
+**防回归：**
+<how to recognize or avoid recurrence>.
+```
+
+```markdown
+## 目录
+
+| 编号 | 记录 | 类型 |
+| --- | --- | --- |
+| 01 | [<specific durable rule>](#<anchor>) | 设计约束 |
+
+## <specific durable rule>
+> **类型：设计约束**
+
+**约束：**
+<the rule future work must preserve>.
+
+**理由：**
+<why this rule exists>.
+
+**防回归：**
+<review check or regression guard>.
+```
 
 ## Handover Shape
 
@@ -78,6 +135,8 @@ For unfinished work paused for a long time, record the checkpoint in `handover.m
 
 - Evidence first: record facts only when backed by command output, files read, logs, board observations, code diffs, or explicit user confirmation.
 - Update current docs in place. Do not append chat chronology.
+- Prefer prose for record body text. Do not turn every sentence into a `-` list item; use bullets only when the field contains multiple peer items that are easier to scan as a list. Prefer a compact table directory for multi-record corrections/constraints files; do not use dash-list directories.
+- Keep function README files short and stable. If the content becomes detailed current state, evidence, risk, technical debt, or a multi-step plan, move that detail to `handover.md`, `runbook.md`, `corrections.md`, or `constraints.md` and leave only a pointer plus the current summary in README.
 - Do not let an entrypoint become a流水账. If repeated dated runs contain durable value, distill the latest valid conclusion into `handover.md` or the reusable command into `runbook.md`; discard non-durable chronology.
 - Runbooks are operating manuals, not experiment logs. Keep reusable commands, acceptance gates, and at most one compact "current baselines" table; update or replace rows when new evidence supersedes old evidence.
 - Raw dated experiments belong in a temporary plan or scratch record. `handover.md` gets the distilled conclusion and current limits; `runbook.md` gets only the stable procedure and minimal proof signal needed to rerun it.
@@ -121,8 +180,13 @@ Before finishing any module-notes update, check:
 - Common facts were extracted to `common/`.
 - Verified facts and open questions are separated.
 - Tested commands include exact parameters, paths, and success signals.
+- Solved problems live in `corrections.md`; durable constraints live in `constraints.md`; do not mix them in one file.
+- `corrections.md` records use `> **类型：已解决问题**`; `constraints.md` records use `> **类型：设计约束**`.
+- Multi-record `corrections.md` and `constraints.md` files include a `## 目录` section, preferably as a compact table, and bold field labels such as `**问题：**` or `**约束：**` are on their own line.
+- Record bodies are readable prose by default; bullet lists are reserved for true parallel items, not used as the default sentence style.
 - For migrations, source command blocks and runbook facts were reconciled against target `runbook.md` files, or the unrecoverable gap is explicitly documented.
 - Corrections were captured when the user pointed out a mistake.
+- The function `README.md` remains a short first-screen entrypoint; detailed continuation state lives in `handover.md`.
 - The function `handover.md` lets a new operator continue from the current state, including scope, implementation state, change boundaries, verified facts, handoff path, and open risks.
 - Long-pause handovers include resume entry, current state, proven boundary, and next action when the task is unfinished.
 - Stable command sequences live in `runbook.md`, not copied across multiple current docs.
@@ -134,6 +198,7 @@ Before finishing any module-notes update, check:
 ## References
 
 Only load these when they help the current edit:
+- `references/solved-issue-mode.md`: quality gate and exact structure for solved or bounded problem records; read only when the user asks to turn a verified investigation into reusable learning.
 - `references/placement-model.md`: compact ownership table.
 - `references/handover-guidelines.md`: handover content shape.
 - `references/repo-pattern.md`: repository-specific current layout.

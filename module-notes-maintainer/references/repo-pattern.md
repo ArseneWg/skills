@@ -24,10 +24,13 @@ Use the current repository layout as the default pattern.
   - `handover.md`
   - `runbook.md`
   - `corrections.md`
-- `README.md` is a useful function entrypoint, not a pure file list.
-- `handover.md` is the current state.
+  - `constraints.md`
+- `README.md` is the stable first-screen function entrypoint: scope, current goal, short current-state summary, where to start, and critical links. It is not a pure file list and must not absorb detailed implementation state, evidence matrices, risk inventories, technical-debt lists, long next-step plans, or dated run logs.
+- `handover.md` is the detailed current continuation state: implementation state, verified facts, change boundaries, limitations, open risks, and next actions.
 - `runbook.md` is the reusable command path.
-- `corrections.md` is the mistake/fix/future-guard record.
+- `corrections.md` is the solved-problem and mistake/fix/verification/regression-prevention record.
+- `constraints.md` is the durable design/workflow/API boundary record.
+- Multi-record `corrections.md` and `constraints.md` files include a `## 目录`, preferably a compact table; record types use bold blockquotes, record field labels stay bold on their own line, and field bodies use prose by default.
 
 ## Compression Pattern
 
@@ -37,6 +40,7 @@ When condensing a session into notes:
 - when migrating old notes, inventory source command blocks and reconcile them into the target `runbook.md`
 - if no recoverable command source exists, document that as a current gap instead of leaving an empty-looking runbook
 - keep the shortest explanation that changes operator behavior
+- keep README as the short first-screen entrypoint and move detailed current state to `handover.md`
 - put cross-module facts into `common/`
 - update current function docs in place
 - delete obsolete flat files and compatibility pointers after migration
@@ -48,7 +52,7 @@ When adding or updating a function:
 1. Compare the request with existing module/function directories.
 2. Reuse an existing function if the target is the same.
 3. Ask before creating a new function if the match is ambiguous.
-4. Add or update the function directory with the four standard files.
+4. Add or update the function directory with the five standard files.
 5. Link the function from `module_notes/README.md`.
 6. Extract shared rules into `module_notes/common/`.
 7. Leave `AGENTS.md` unchanged unless the information is repo-wide and stable.
