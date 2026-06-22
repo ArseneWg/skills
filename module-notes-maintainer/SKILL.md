@@ -1,6 +1,6 @@
 ---
 name: module-notes-maintainer
-description: Maintain repository module_notes organized by module/function. Use when Codex needs to create or update module/function notes, handovers, runbooks, corrections, constraints, common user preferences, tested command records, environment facts, recurring-error fixes, current handoff/runbook records, or solved-issue learning capture. For solved issues, use this skill when the user explicitly wants to turn a verified or bounded investigation into problem/root cause/fix/verification/regression-prevention notes.
+description: Maintain repository module_notes as durable, verified module/function documentation. Use when Codex needs to update module notes, handovers, runbooks, common facts, tested commands, constraints, or correction records. Use solved-issue capture only when the user explicitly asks to record a resolved or bounded investigation as problem/root cause/fix/verification/regression guard.
 ---
 
 # Module Notes Maintainer
