@@ -15,8 +15,10 @@ Default layout:
 module_notes/
   README.md                  # the single directory/index router
   common/
-    00_user_preferences.md
-    <shared-board-build-adb-ssh-tooling>.md
+    user_preferences.md
+    board_access.md
+    build.md
+    corrections.md
   <module>/
     <function>/
       README.md              # current functional entrypoint, not a directory index
@@ -30,7 +32,7 @@ module_notes/
 
 ## Before Writing
 
-- Read the routers first: `AGENTS.md`, then `module_notes/README.md`. Use the root README to find common docs and the target function. Then read the relevant function `README.md` if it exists.
+- Read the routers first: `AGENTS.md`, then `module_notes/README.md`. Use the root README to find the relevant common docs and target function. Then read the relevant function `README.md` if it exists.
 - Identify the module and function. If a new request looks similar to an existing function, update the existing function docs instead of creating a new directory.
 - If the target function is unclear or two existing functions may match, ask the user before creating a new module/function directory.
 - For migrations or broad cleanups, inventory the source files before editing: command fences, shell snippets, binary paths, board paths, success/failure signals, and user corrections. Use `git show HEAD:<old-path>` when deleting tracked old notes.
@@ -41,8 +43,8 @@ module_notes/
 Record these durable items in the narrowest useful place:
 
 - User preferences: repeated user requirements, strong corrections, preferred workflows, naming, validation style, and "do not do this again" rules.
-- Corrections and solved issues: concrete mistakes or failures, the root cause, the fix, verification, and the future guard. Put feature-specific records in `<function>/corrections.md`; cross-module mistakes go to `common/`.
-- Constraints: durable design, API, workflow, or documentation rules that should shape future edits but are not themselves a solved failure. Put feature-specific constraints in `<function>/constraints.md`; cross-module constraints go to `common/`.
+- Corrections and solved issues: concrete mistakes or failures, the root cause, the fix, verification, and the future guard. Put feature-specific records in `<function>/corrections.md`; cross-module mistakes that any module/function may hit go to `common/corrections.md`.
+- Constraints: durable design, API, workflow, or documentation rules that should shape future edits but are not themselves a solved failure. Put feature-specific constraints in `<function>/constraints.md`; cross-module constraints go to the narrowest relevant common file.
 - Tested commands: exact command, key parameters, working directory, built binary path, deployed board path, and success/failure signals.
 - Environment facts: board address, host paths, device nodes, services, firmware/image state, tool versions, and known permissions.
 - Recurring errors: symptom -> cause/scope -> fix/workaround -> how to verify.
@@ -59,7 +61,11 @@ When solved-issue mode applies, read `references/solved-issue-mode.md`, distill 
 ## Placement Rules
 
 - `module_notes/README.md` owns all directory/index records: modules, functions, common docs, and where to start. Keep this centralized unless the user explicitly chooses a different single index file such as `module_notes/modules/README.md`.
-- `module_notes/common/` owns common user preferences, current board access, ADB/SSH rules, SDK/kernel/Buildroot package build commands, shared host setup, and cross-module mistakes. Do not add `common/README.md` just to index these files; list them in the root README.
+- `module_notes/common/` owns project-wide information that multiple modules/functions can use before a target function is known. Keep it flat and semantic: `user_preferences.md`, `board_access.md`, `build.md`, and `corrections.md`. Do not add `common/README.md`; list common files in the root README.
+- `common/board_access.md` owns board access and network facts/rules: current board/host addresses, ADB/SSH entrypoints, whether `adb root` is needed, host-side ADB permission boundaries, process cleanup rules, SOCKS5 forwarding, host routes, route/MTU checks, iperf or throughput checks, network baselines, and network boundary checks.
+- `common/build.md` owns SDK/kernel/rootfs/image/Buildroot package build commands, clean/rebuild rules, artifact locations, and build success signals.
+- `common/corrections.md` owns cross-module solved problems that any module/function may hit, such as ADB transfer degradation, host route failures, stale build artifacts, or documentation migration mistakes. Use the same styled solved-issue record format as function `corrections.md`.
+- `common/user_preferences.md` owns durable user preferences and repeated user corrections about working style.
 - `<function>/README.md` is the stable first-screen entrypoint: scope, current goal, a short current-state summary, where to start, and critical links. It should answer "what is this function and where do I read next"; it must not become a detailed implementation record, evidence matrix, risk inventory, technical-debt list, long next-step plan, or dated run log.
 - `<function>/handover.md` owns the detailed current continuation state: implementation state, verified facts, change boundaries, limitations, open risks, and next actions.
 - `<function>/runbook.md` owns reusable ordered procedures and exact validated commands.
@@ -143,6 +149,8 @@ For unfinished work paused for a long time, record the checkpoint in `handover.m
 - Temporary plans may keep raw chronology, but any top or current-state summary must be refreshed when evidence changes; replace stale summary rows or explicitly mark them superseded before finishing.
 - If a runbook edit adds multiple dated headings, repeats an existing command block, or preserves old samples only "for context", stop and compress before finishing.
 - Extract common facts while writing. If a command or rule applies across modules, put it in `common/` and link to it from the function.
+- Do not let common become a mixed scratch file. Common file names must describe the information function directly: preferences, device access, network, build, or cross-module corrections.
+- In common files, separate operation rules from solved problems. Put reusable commands and current facts in `board_access.md` or `build.md`; put public problem/root-cause/fix records in `corrections.md`.
 - Keep runbooks canonical: when a command sequence is stable, maintain it in `runbook.md`; other docs should link or summarize instead of duplicating the full sequence.
 - Keep commands runnable. Include cwd, env vars, binary path, board destination path, and verification command when they matter.
 - Split multi-host work clearly. Host, board, CI, and service commands need separate paths, permissions, and success signals.
@@ -164,7 +172,7 @@ When converting flat notes or compressing noisy docs:
    - Check tracked deleted sources with `git show HEAD:<path>` if the file is already gone.
 2. Map every source command record to exactly one target function `runbook.md`.
 3. Normalize environment-specific values:
-   - Current board serial belongs in `common/01_board_access.md`; function runbooks should use `$BOARD` unless the old serial is itself the subject.
+   - Current board serial belongs in `common/board_access.md`; function runbooks should use `$BOARD` unless the old serial is itself the subject.
    - Replace passwords, PSKs, tokens, and private values with placeholders such as `<wifi-psk>` and document the lookup owner/method, not the value.
 4. If no recoverable command exists for a function, write that as a current gap in `handover.md` or `runbook.md`. Do not leave an empty template that looks complete.
 5. Run the audit script when available:
@@ -178,6 +186,8 @@ Before finishing any module-notes update, check:
 - A similar existing function was reused, or the user approved a new one when ambiguous.
 - New modules/functions are linked from `module_notes/README.md`.
 - Common facts were extracted to `common/`.
+- Common docs use semantic flat filenames; no numeric prefixes, broad catch-all files, or nested common directories.
+- Cross-module solved problems live in `common/corrections.md`, not inside operation files such as `board_access.md` or `build.md`.
 - Verified facts and open questions are separated.
 - Tested commands include exact parameters, paths, and success signals.
 - Solved problems live in `corrections.md`; durable constraints live in `constraints.md`; do not mix them in one file.

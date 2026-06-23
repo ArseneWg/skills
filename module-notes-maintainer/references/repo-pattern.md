@@ -15,8 +15,14 @@ Use the current repository layout as the default pattern.
 - Do not create `module_notes/<module>/README.md`, `module_notes/common/README.md`, or other index-only files.
 
 3. `module_notes/common/`
-- Store shared user preferences, board access, ADB/SSH rules, SDK/kernel/rootfs/image/Buildroot commands, shared host setup, and cross-module mistakes.
+- Store only project-wide information that multiple modules/functions can use before a target function is known.
+- Keep common flat and semantic:
+  - `user_preferences.md`
+  - `board_access.md`
+  - `build.md`
+  - `corrections.md`
 - Common docs are listed from the root README, not from a common README.
+- Reusable facts and commands stay in the topic file; cross-module problem/root-cause/fix records stay in `common/corrections.md`.
 
 4. `module_notes/<module>/<function>/`
 - Each function directory owns exactly the current working files:
@@ -41,7 +47,8 @@ When condensing a session into notes:
 - if no recoverable command source exists, document that as a current gap instead of leaving an empty-looking runbook
 - keep the shortest explanation that changes operator behavior
 - keep README as the short first-screen entrypoint and move detailed current state to `handover.md`
-- put cross-module facts into `common/`
+- put cross-module facts into the narrowest semantic common file
+- put cross-module solved problems into `common/corrections.md`
 - update current function docs in place
 - delete obsolete flat files and compatibility pointers after migration
 - do not create extra evidence directories for dated runs

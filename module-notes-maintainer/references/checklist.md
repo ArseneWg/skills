@@ -12,10 +12,12 @@ Use this before finishing a notes update.
 - For migrations, did I inventory old command fences, executable snippets, paths, board destinations, and success/failure signals before deleting source files?
 - Did every recoverable source command land in exactly one target `runbook.md`?
 - If a runbook has no command fences, does its runbook or handover explicitly say why no recoverable/fixed command exists?
-- Did I replace stale sample board serials with `$BOARD` and keep the current board value in `common/01_board_access.md`?
+- Did I replace stale sample board serials with `$BOARD` and keep the current board value in `common/board_access.md`?
 - Are host/board/CI/service commands separated when roles differ?
 - Does the canonical command sequence live in `runbook.md` instead of being duplicated?
 - Did I extract cross-module facts to `module_notes/common/`?
+- Did I place common facts in the narrowest semantic file: `user_preferences.md`, `board_access.md`, `build.md`, or `corrections.md`?
+- Did I keep cross-module solved problems in `common/corrections.md` instead of mixing them into device/network/build operation files?
 - Is each function README still a short first-screen entrypoint, with detailed current state, evidence, risks, technical debt, and long plans moved to the appropriate handover/runbook/corrections/constraints file?
 - Did I keep concrete solved problems in `corrections.md` and durable constraints in `constraints.md`?
 - Do solved-problem records include `> **类型：已解决问题**`, and constraint records include `> **类型：设计约束**`?
@@ -26,6 +28,7 @@ Use this before finishing a notes update.
 - Are new modules/functions discoverable from `module_notes/README.md`?
 - Are current entrypoints concise, with durable dated-run conclusions distilled into handover/runbook instead of stored as chronology?
 - Did I avoid creating README files that only list files, especially module-level, common-level, or history-level README files?
+- Did I avoid numeric-prefix common files, nested common directories, and broad catch-all common files?
 - Did I delete obsolete flat compatibility pointers after moving useful content?
 - Did I avoid creating `history/` directories?
 - Did I avoid secrets, partial secret values, secret logs/screenshots, and secret-printing commands?

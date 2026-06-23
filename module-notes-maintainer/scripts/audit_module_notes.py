@@ -15,6 +15,12 @@ ALLOWED_FUNCTION_FILES = {
     "corrections.md",
     "constraints.md",
 }
+ALLOWED_COMMON_FILES = {
+    "user_preferences.md",
+    "board_access.md",
+    "build.md",
+    "corrections.md",
+}
 
 BANNED_PATTERNS = [
     (re.compile(r"history/"), "history path"),
@@ -171,6 +177,8 @@ def main() -> int:
                 errors.append(f"unexpected nested common file: {rel(root, path)}")
             if path.name == "README.md":
                 errors.append(f"common README is not allowed: {rel(root, path)}")
+            elif path.name not in ALLOWED_COMMON_FILES:
+                errors.append(f"unexpected common file: {rel(root, path)}")
             continue
 
         if len(parts) == 2:
