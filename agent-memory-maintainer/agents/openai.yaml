@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Memory 维护器"
+  short_description: "维护紧凑的 agent_memory 上下文记忆"
+  default_prompt: "使用 $agent-memory-maintainer 维护 agent_memory，把当前上下文、长期知识、命令、案例和可选 playbook 分开记录。"

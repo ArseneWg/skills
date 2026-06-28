@@ -1,0 +1,4 @@
+interface:
+  display_name: "Minimal Sufficient Change"
+  short_description: "用最小但充分的语义改动控制代码膨胀并保留必要验证机制"
+  default_prompt: "Use $minimal-sufficient-change to keep this code change minimal, sufficient, safe, and verified."
