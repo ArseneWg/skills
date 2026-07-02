@@ -40,7 +40,7 @@ The helper wraps the local rk-redmine retrieval scripts when they are available,
    Convert PDFs to text, inspect images when they carry technical evidence, decompress archives only inside the issue workspace, and summarize large logs with exact filenames and relevant line excerpts or counters.
 
 4. Map the issue to code.
-   Identify the affected subsystem, then read the relevant repository code and any applicable `module_notes/`. Use `rg` first for searches. Cite concrete files and line numbers for non-trivial claims. Prefer existing platform, kernel, build, and configuration patterns over speculation.
+   Identify the affected subsystem, then read the relevant repository code and any applicable repo-local memory or notes such as `agent_memory/`. Use `rg` first for searches. Cite concrete files and line numbers for non-trivial claims. Prefer existing platform, kernel, build, and configuration patterns over speculation.
 
 5. Write `analysis.md` in the issue workspace.
    Use `references/analysis-format.md` for the expected structure. The analysis should include saved materials, issue facts, attachment evidence, code evidence, hypotheses, validation steps, and a reply draft when useful.
@@ -54,4 +54,3 @@ The helper wraps the local rk-redmine retrieval scripts when they are available,
 - Treat timing, environment differences, board configuration, kernel config, DTS, firmware, service scripts, and userspace command lines as first-class evidence when they are relevant.
 - If two environments behave differently, compare the smallest concrete variables first: hardware path, firmware or driver availability, kernel config, device tree, service startup, command arguments, logs, and measured counters.
 - Avoid issue-specific wording in reusable notes or skill updates. The skill is for all Redmine issues, not a single defect.
-
