@@ -6,8 +6,9 @@ This repository is a small, shareable collection of custom Codex skills built fr
 
 - [Featured Skills](#featured-skills)
 - [Detailed Skill Usage](#detailed-skill-usage)
-  - [`git-repo-publish-sanitize`](#git-repo-publish-sanitize)
-  - [`module-notes-maintainer`](#module-notes-maintainer)
+  - [`agent-memory-maintainer`](#agent-memory-maintainer)
+  - [`diagnosing-bugs-v2`](#diagnosing-bugs-v2)
+  - [`minimal-sufficient-change`](#minimal-sufficient-change)
   - [`rk-gerrit`](#rk-gerrit)
   - [`pptx`](#pptx)
   - [`rk-redmine-analysis`](#rk-redmine-analysis)
@@ -22,8 +23,9 @@ This repository is a small, shareable collection of custom Codex skills built fr
 
 | Skill | What it solves | Notable details |
 | --- | --- | --- |
-| `git-repo-publish-sanitize` | Initialize a repo, publish it to GitHub, remove leaked secrets from history, and delete/recreate remotes when cleanup must reach GitHub. | Includes a bundled Linux `x86_64` `gh` fallback, in-place sanitization guidance, and concrete notes on sandbox, auth, and scope pitfalls. |
-| `module-notes-maintainer` | Turn chat history, logs, diffs, and verified repo state into durable notes without mixing repo rules, runbooks, handover notes, and temporary debugging residue. | Useful when a codebase is growing and operational knowledge keeps getting lost in chat. |
+| `agent-memory-maintainer` | Maintain compact repo-local `agent_memory/` records for future agents. | Keeps current context, long-term knowledge, commands, cases, and mature playbooks in a narrow V2 layout. |
+| `diagnosing-bugs-v2` | Diagnose and fix bugs, regressions, failing tests, slowdowns, and intermittent failures. | Enforces a red/green diagnostic loop, evidence-backed hypotheses, cleanup, and final delivery gates. |
+| `minimal-sufficient-change` | Keep implementation, repair, refactor, and review work scoped to the smallest sufficient semantic change. | Blocks speculative abstractions while preserving correctness, safety, readability, and verification. |
 | `pptx` | Read, inspect, create, edit, split, merge, and repair `.pptx` files. | Includes Office XML helpers and PowerPoint-specific editing workflows. |
 | `rk-gerrit` | Work against Rockchip internal Gerrit for login checks, connectivity tests, change lookup, review signal triage, and blocker analysis. | Keeps the key path local-only and documents the exact review and submit signals to inspect. |
 | `rk-redmine-analysis` | Fetch and analyze Rockchip Redmine issues, attachments, logs, screenshots, and related repository code. | Produces evidence-backed issue analysis and reply drafts. |
@@ -34,118 +36,86 @@ This repository is a small, shareable collection of custom Codex skills built fr
 
 This section explains what each checked-in custom skill outside `.system/` is for, when to use it, and what workflow it enforces.
 
-### `git-repo-publish-sanitize`
+### `agent-memory-maintainer`
 
-Use this skill for local Git and GitHub repository lifecycle work where small mistakes are expensive: initializing a repository, preparing a focused first commit, publishing to GitHub, removing accidentally tracked secrets, or deleting and recreating a remote after sensitive material has already been pushed.
+Use this skill to maintain `agent_memory/`, a compact repo-local memory system for future agents. It is for durable engineering context, not chat archives.
 
 Use it when:
 
-- A directory needs to become a Git repository.
-- A local repository needs a clean initial commit and GitHub remote.
-- The user wants to publish the current directory without copying it through `/tmp`.
-- A secret, credential, token, key, local config, or generated file was accidentally tracked.
-- A remote GitHub repository must be deleted and recreated because secret history was already pushed.
-- Visibility or remote setup needs to be verified instead of guessed.
+- The user asks to create, update, read, route, extract, consolidate, or refresh `agent_memory/`.
+- A repository needs current context, long-term knowledge, commands, cases, or mature playbooks preserved for later agents.
+- Old note systems need to be migrated into the V2 `agent_memory/` layout.
+- Existing memory needs to be checked before a task that depends on workspace history.
 
 Normal workflow:
 
-1. Inspect the directory or existing repo with `git status -sb`.
-2. Identify the requested scope: local init, GitHub publish, docs, ignore rules, secret cleanup, visibility, or remote recreation.
-3. Keep work in the target repository in place; do not create a sanitized replacement in `/tmp`.
-4. Add `.gitignore` before the first commit when local-only files must never be tracked.
-5. Stage only intentional files and make focused commits.
-6. Prefer authenticated system `gh`; use the bundled `gh` fallback only when needed.
-7. If a secret was tracked, remove it from the index and history as required, then verify the remote does not retain the leaked object.
-8. If a pushed repository cannot be safely cleaned, delete and recreate the remote only when that is the intended repair.
+1. Read repo instructions and `agent_memory/README.md`.
+2. Use `agent_memory/INDEX.md` to select the narrowest relevant scope.
+3. Read context, knowledge, playbooks, commands, and cases in that scope as needed.
+4. Extract only future-useful facts from verified artifacts.
+5. Classify candidates as context, knowledge, command, case, or playbook.
+6. Consolidate against existing records before writing.
+7. Store the minimum durable record in the narrowest correct location.
 
 Important safety rules:
 
-- Never print or commit secrets while diagnosing.
-- Treat `.env`, private keys, cookies, tokens, generated credentials, and local machine paths as local-only unless the user explicitly says otherwise.
-- Do not use `gh` binaries from `/tmp`.
-- Keep the final answer concrete: repo path, branch, commit id, remote URL, visibility, and any cleanup still required.
+- Only target `agent_memory/`; do not recreate legacy `module_notes/` unless explicitly requested.
+- Do not create empty optional files.
+- Do not copy raw chat logs or append chronology; distill verified facts, commands, cases, and handoff state.
+- Ask before creating a new scope when module or function ownership is unclear.
 
-### `module-notes-maintainer`
+### `diagnosing-bugs-v2`
 
-Use this skill to maintain repository notes under `module_notes/` so the next operator can continue without reading chat history. It is for preserving durable, verified engineering knowledge: commands that actually worked, board paths, build artifacts, environment facts, user preferences, recurring mistakes, and handoff state.
+Use this skill for bug diagnosis and repair: regressions, failing tests, crashes, slowdowns, intermittent failures, and user-reported bad behavior. The checked-in install path is `diagnosing-bugs`; the skill registers as `diagnosing-bugs-v2`.
 
-The core rule is: `module_notes/` is organized by module and function, not by chat session, date, or history phase.
+Use it when:
 
-Expected layout:
+- The user asks to diagnose, debug, find root cause, or investigate a failure.
+- A test, build, command, board run, or workflow is failing.
+- A performance regression or flaky behavior needs evidence-backed isolation.
+- A previous attempted fix lacks a clear red/green loop.
 
-```text
-module_notes/
-  README.md
-  common/
-    00_user_preferences.md
-    01_board_access.md
-    02_sdk_build_operations.md
-    03_notes_maintenance_corrections.md
-  <module>/
-    <function>/
-      README.md
-      handover.md
-      runbook.md
-      corrections.md
-```
+Normal workflow:
 
-Hard rules:
+1. Establish the shortest diagnostic loop that can turn red for the exact symptom.
+2. Reproduce the issue and shrink variables until the remaining conditions matter.
+3. Read enough relevant context to form falsifiable hypotheses.
+4. Test one hypothesis at a time with explicit observations or temporary instrumentation.
+5. Fix only after the root cause is verified.
+6. Re-run the original loop, check known-good paths, clean temporary changes, and report remaining risk.
 
-- `module_notes/README.md` is the only directory index.
-- Do not create `module_notes/<module>/README.md`.
-- Do not create `module_notes/common/README.md`.
-- Do not create `history/`, `logs/`, pure jump files, or compatibility pointers for old structures.
-- A function directory should contain only `README.md`, `handover.md`, `runbook.md`, and `corrections.md`.
-- Do not write append-only chat chronology. Distill current conclusions, reusable commands, corrections, and handoff state.
+Important safety rules:
 
-Standard workflow:
+- Do not claim root cause without a diagnostic loop and evidence.
+- Do not stack behavior-changing experiments; revert failed probes before trying another.
+- Temporary workarounds are not final fixes.
+- Final delivery must include verification, known-good coverage, cleanup status, uncovered areas, and residual risk.
 
-1. Read `AGENTS.md`, then `module_notes/README.md`.
-2. Identify the target module and function.
-3. Reuse an existing function directory if the request matches an existing function.
-4. Ask before creating a new function directory when the match is ambiguous.
-5. Read the target function `README.md`; then use `handover.md`, `runbook.md`, or `corrections.md` as needed.
-6. Record only durable, verified information.
-7. At the end of meaningful work, update the function handoff and any reusable commands.
-8. For broad cleanup or migration, run the audit script.
+### `minimal-sufficient-change`
 
-File ownership:
+Use this skill to keep code changes, fixes, refactors, and reviews focused on the minimum sufficient semantic change for the current request.
 
-- `module_notes/README.md`: module/function router, common-doc list, reading order, and current directory map.
-- `module_notes/common/`: cross-module user preferences, board access, ADB/SSH rules, SDK/Buildroot/kernel/rootfs/image commands, shared host facts, and cross-module mistakes.
-- `<function>/README.md`: current functional entrypoint with scope, state, and where to start.
-- `<function>/handover.md`: current status, verified facts, limitations, open risks, and next actions.
-- `<function>/runbook.md`: reusable procedures and exact commands, including cwd, parameters, artifact paths, board paths, and success/failure signals.
-- `<function>/corrections.md`: user-reported mistakes, root cause, fix, and future guard.
+Use it when:
 
-Scenario guide:
+- Implementing or modifying functionality.
+- Fixing a defect without expanding scope.
+- Refactoring code where behavior must stay controlled.
+- Reviewing whether a diff adds unnecessary abstraction, files, APIs, dependencies, or configuration.
 
-- New module or function: compare the request against existing entries in `module_notes/README.md`; update an existing function when the target is the same, create a new directory only when it is genuinely distinct, and link it from the root README.
-- Continue existing work: read the function `README.md`, then `handover.md` for current state, `runbook.md` for commands, and `corrections.md` for known traps.
-- Tested command succeeds: write the runnable command to `runbook.md` with cwd, env vars, binary path, board destination path, log path, and success signal.
-- User points out an error: write it to `corrections.md`; if the mistake applies across modules, write it under `common/`.
-- Session or phase ends: update `handover.md` so a new operator can resume from the current state without the chat.
-- Common fact appears: move it into `common/` instead of copying it into every function.
-- Old notes are migrated or compressed: inventory old command fences, shell snippets, paths, artifacts, board destinations, success/failure signals, and corrections before deleting source files.
-- No command can be recovered: state that gap explicitly in the target `handover.md` or `runbook.md`; do not leave an empty template that looks complete.
-- Old board IP appears: normalize function runbooks to `$BOARD` and keep the current value only in `common/01_board_access.md`.
-- Secret-like value appears: replace passwords, PSKs, tokens, private keys, cookies, and partial secret values with placeholders such as `<wifi-psk>` and document only lookup method or owner.
-- Multi-host workflow appears: keep host, board, CI, service, Windows, and PC commands separate, each with its own cwd, paths, permissions, and success signal.
+Normal workflow:
 
-Migration audit:
+1. State the intended observable behavior and completion criteria.
+2. Read the target code, callers, tests, project rules, helpers, and existing dependencies.
+3. Prefer no new code, existing project APIs, standard capabilities, then local edits before adding new abstractions.
+4. Put the change at the correct ownership boundary.
+5. Review the final diff for unnecessary concepts, files, public API, formatting churn, and unrelated cleanup.
+6. Validate in proportion to the risk.
 
-```bash
-python3 tools/skills/module-notes-maintainer/scripts/audit_module_notes.py module_notes
-```
+Important safety rules:
 
-The audit checks for:
-
-- Only one root index.
-- No module-level README, common README, `history/`, or `logs/`.
-- No stale sample board serials.
-- No sample plaintext PSK.
-- No placeholder wording such as `TODO` or "待补".
-- Empty runbooks must explicitly explain why no fixed or recoverable command exists.
+- Do not remove safety, validation, error handling, data integrity, concurrency protection, idempotency, or trust-boundary checks to reduce code.
+- Do not add speculative features, wrappers, factories, registries, public API, TODO scaffolding, or unused configuration.
+- Do not treat fewer lines as proof of correctness.
 
 ### `rk-gerrit`
 
@@ -293,20 +263,12 @@ Important safety rules:
 
 ## Install
 
-If you already have Codex and the built-in `skill-installer`, install the Git skill from this repo with:
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo xiaoyao888888/skills \
-  --path git-repo-publish-sanitize
-```
-
 Install all public custom skills from this repository with:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo xiaoyao888888/skills \
-  --path git-repo-publish-sanitize module-notes-maintainer pptx rk-gerrit rk-redmine-analysis slides smux
+  --path agent-memory-maintainer diagnosing-bugs minimal-sufficient-change pptx rk-gerrit rk-redmine-analysis slides smux
 ```
 
 After installation, restart Codex so the new skills are discovered.
@@ -314,9 +276,11 @@ After installation, restart Codex so the new skills are discovered.
 ## Example Prompts
 
 ```text
-Use $git-repo-publish-sanitize to initialize this directory, audit secrets, and publish a clean GitHub repository.
+Use $agent-memory-maintainer to update this repository's agent_memory with the verified commands and current handoff.
 
-Use $module-notes-maintainer to summarize verified progress on this module and move the durable facts into the right notes.
+Use $diagnosing-bugs-v2 to investigate this failing test and prove the root cause before patching.
+
+Use $minimal-sufficient-change to review this implementation and remove unnecessary abstraction without weakening behavior.
 
 Use $pptx to extract text and thumbnails from this presentation, then summarize slide-level issues.
 
