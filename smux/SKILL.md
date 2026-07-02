@@ -126,6 +126,40 @@ tmux-bridge read %4 20
 tmux-bridge keys %4 Enter
 ```
 
+## Agent Coordination Protocols
+
+### Two-Phase Handoff
+
+When asking another agent pane to implement or review work, use a two-phase handoff:
+
+1. Send the current plan first. Include the latest scope, obsolete prior decisions, forbidden edits, allowed files or modules, validation commands, and the expected final report format.
+2. Ask the target agent to explicitly agree or object before implementation starts.
+3. Start implementation only after the target agent clearly agrees.
+4. After completion, independently verify the critical boundaries instead of relying only on the target agent's summary.
+
+This avoids stale pane context causing an agent to continue an older plan after the main decision has changed.
+
+### Long-Running Work
+
+Do not continuously watch another agent pane during long builds, tests, board runs, or large edits. Prefer one of these patterns:
+
+- Ask the target agent to notify you when it finishes or reaches a blocker.
+- Agree on sparse phase checks, such as after implementation, after build, and after board smoke.
+- Use a one-shot subagent for noisy fixed-command work when subagents are allowed and the task can be summarized into exit codes, logs, and pass/fail evidence.
+
+Keep the main pane focused on decisions, acceptance criteria, and final verification.
+
+### Pane Recovery
+
+When a pane appears stuck but contains useful context, try to preserve and recover the existing pane before opening a new thread.
+
+1. Capture recent output and identify whether it is waiting for input, blocked on an approval prompt, sitting in a TUI, or missing an Enter.
+2. Send only the minimal key needed, commonly `Enter`, `C-m`, or a clearly justified `C-c`.
+3. Re-read after the action to confirm the pane advanced.
+4. Restart or replace the pane only when the current context is unrecoverable or unsafe to continue.
+
+Never press Enter on an auto-suggested prompt unless you have verified the visible text is the intended instruction.
+
 ---
 
 ## Raw tmux Commands
@@ -156,6 +190,17 @@ tmux send-keys -t shared -l -- "Please apply the patch"
 sleep 0.1
 tmux send-keys -t shared Enter
 ```
+
+When using raw tmux as a fallback for an agent pane, keep the same safety shape as tmux-bridge:
+
+```bash
+tmux capture-pane -t %1 -p | tail -40
+tmux send-keys -t %1 -l -- "Please review the current plan and confirm before implementing."
+tmux capture-pane -t %1 -p | tail -20
+tmux send-keys -t %1 Enter
+```
+
+If `Enter` does not submit in the target application, try `C-m` after verifying the prompt still contains the intended text. Do not live-poll an agent pane for a reply; use sparse checks or wait for an explicit notification.
 
 ### Panes and Windows
 
@@ -195,6 +240,16 @@ for s in shared worker-2 worker-3 worker-4; do
   tmux capture-pane -t $s -p 2>/dev/null | tail -5
 done
 ```
+
+### Codex-To-CC Worker Pattern
+
+- When Codex is outside tmux and `TMUX` is unset, `tmux-bridge` cannot reach the server; use raw `tmux capture-pane` / `tmux send-keys`, but still read the target pane, type the prompt, capture to verify it landed, then send Enter.
+- Keep CC worker panes fresh for bounded tasks. If a pane is stuck, carries heavy prior context, or expands a narrow task, interrupt and restart it rather than layering more instructions.
+- For write-risk tasks, give CC exact allowed commands and a strict output schema. State `read-only`, `no edits`, `no commits`, and `no extra files`; Codex decides whether to apply any suggested change.
+- For implementation handoffs, require explicit agreement on the plan before authorizing edits. Restate any changed boundary, especially files that must not be touched.
+- For final reports, request changed files, validation run, uncovered risk, commit status, and whether any forbidden file or secret was touched.
+- Treat Claude Code auto-suggested next prompts as untrusted. Before each new task, type the intended prompt and capture the pane to verify it replaced the suggestion; never press Enter on a suggestion you did not send.
+- Match model to task and verify empirically: cheaper models are acceptable for command collection, but use stronger models for judgment/review when the cheaper model overreaches or invents follow-up work.
 
 ## Tips
 
