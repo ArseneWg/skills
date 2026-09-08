@@ -1,44 +1,31 @@
 # Codex Agent Foundry
 
-A conservative multi-agent baseline for Codex projects: strong root ownership, read-first delegation, a single source-code writer per checkout, independent review, and evidence-backed verification.
+A minimal Codex multi-agent baseline: the root remains the only default writer, while two read-only specialists handle exploration and independent review.
 
 ## Architecture
 
 ```text
-                         Root
-                  GPT-5.6 Sol / medium
-                         │
-             owns plan / decisions / merge
-                         │
-        ┌────────────────┼─────────────────┐
-        │                │                 │
-        ▼                ▼                 ▼
- Repo Explorer       Implementer        Reviewer
- Terra / medium      Terra / high       Sol / high
- read-only           workspace-write    read-only
-        │                │                 │
-        │                ▼                 │
-        │             Verifier             │
-        │          Luna / medium            │
-        │         workspace-write           │
-        │                │                 │
-        └────────────────┴─────────────────┘
-                         │
-                         ▼
-                       Root
-               inspect diff + final decision
+                 Root
+      plan + implement + verify
+            /          \
+           /            \
+ repo_explorer        reviewer
+ Terra / medium      Sol / high
+   read-only          read-only
+           \            /
+            \          /
+              Root
+        final diff + answer
 ```
 
-## Design rules
+## Why only two subagents
 
-- Root owns requirements, decomposition, architecture, integration, final verification, and the final answer.
-- Prefer subagents for exploration, research, review, and verification.
-- Keep one source-code writer per checkout by default.
-- Run reviewer and verifier after implementation; they may run in parallel when safe.
-- Keep delegation one level deep unless the root explicitly decides otherwise.
-- Give each subagent a bounded mission contract instead of a vague instruction.
-- Treat tests, builds, diffs, source, and documentation as evidence; agent agreement is not evidence.
-- Use separate Git worktrees for substantial parallel implementation.
+The ablation keeps only roles that add a distinct capability:
+
+- `repo_explorer` removes noisy, read-heavy investigation from the root context.
+- `reviewer` provides an independent cold pass after implementation.
+
+The root keeps implementation and verification because splitting those into separate agents adds coordination and token overhead without creating a clear independent information advantage in the default single-checkout workflow.
 
 ## Files
 
@@ -51,14 +38,12 @@ codex-agent-foundry/
     ├── config.toml
     └── agents/
         ├── repo_explorer.toml
-        ├── implementer.toml
-        ├── reviewer.toml
-        └── verifier.toml
+        └── reviewer.toml
 ```
 
-## Install into a repository
+## Install
 
-Copy the template files into the target repository root:
+Copy the template into a repository:
 
 ```bash
 cp codex-agent-foundry/AGENTS.md /path/to/repo/AGENTS.md
@@ -67,44 +52,36 @@ cp codex-agent-foundry/.codex/config.toml /path/to/repo/.codex/config.toml
 cp codex-agent-foundry/.codex/agents/*.toml /path/to/repo/.codex/agents/
 ```
 
-If the target repository already has an `AGENTS.md`, merge the `Subagent orchestration policy` section instead of replacing existing project rules.
+If the target repository already has `AGENTS.md`, merge the orchestration policy instead of replacing project-specific rules.
 
-## Recommended invocation
-
-```text
-Implement this task according to the repository AGENTS.md subagent orchestration policy.
-Investigate first, preserve a single writer in this checkout, then independently review and verify the result.
-Do not recursively delegate unless the root explicitly determines it is necessary.
-```
-
-For a complex bug:
+## Default workflow
 
 ```text
-Diagnose and fix this issue.
-Use repo_explorer for independent evidence gathering before implementation.
-Only hand the bounded change to implementer after the root has a defensible plan.
-After implementation, run verifier and reviewer independently, then let the root inspect the diff and reconcile findings.
+1. Root understands the task and acceptance criteria.
+2. If the affected area is unclear, delegate bounded read-only exploration.
+3. Root implements the smallest defensible change.
+4. Root runs targeted verification.
+5. For non-trivial changes, delegate an independent review.
+6. Root reconciles findings, re-verifies if needed, inspects the final diff, and answers.
 ```
+
+For substantial parallel implementation, use separate Git worktrees rather than multiple writers in one checkout.
 
 ## Model routing
 
-The checked-in routing is a baseline, not a permanent rule:
-
 | Role | Model | Effort | Purpose |
 | --- | --- | --- | --- |
-| Root | `gpt-5.6-sol` | `medium` | Planning, architecture, synthesis, final decision |
+| Root | current session model | current session effort | Plan, implement, verify, integrate |
 | Repo Explorer | `gpt-5.6-terra` | `medium` | Read-heavy codebase exploration |
-| Implementer | `gpt-5.6-terra` | `high` | Bounded implementation |
 | Reviewer | `gpt-5.6-sol` | `high` | Independent correctness/regression review |
-| Verifier | `gpt-5.6-luna` | `medium` | Focused tests, lint, type checks, builds, repro steps |
 
-Available models can differ by account, rollout, authentication mode, and client. Confirm your actual model availability with Codex before relying on these exact IDs.
+The project config intentionally does not force the root model or a global default subagent model. Model availability can differ by account, rollout, authentication mode, and client.
 
 ## Operational boundaries
 
-- `sandbox_mode = "read-only"` is a safe default for explorer/reviewer roles, but it is not an absolute security boundary. Parent runtime permission overrides can affect spawned agents.
-- The verifier uses `workspace-write` because test/build tooling may write caches or artifacts; its instructions forbid intentional source edits.
-- This template intentionally does not set legacy V1-only depth controls. Delegation depth is enforced behaviorally in `AGENTS.md`.
-- The concurrency value is a ceiling, not a target. Do not spawn workers just because capacity exists.
+- Read-only agent sandbox settings are defaults, not absolute security boundaries; parent runtime permissions still matter.
+- Delegation is one level deep by policy, not by legacy V1-only depth configuration.
+- `max_concurrent_threads_per_session = 4` is a ceiling, not a target.
+- Tests, builds, diffs, source, and documentation are evidence; agent agreement is not.
 
-See [VALIDATION.md](./VALIDATION.md) for which parts are current Codex capabilities versus opinionated workflow choices.
+See [VALIDATION.md](./VALIDATION.md) for the ablation rationale and capability/policy boundary.
